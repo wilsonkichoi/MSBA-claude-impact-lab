@@ -42,6 +42,114 @@ Optional live rate check: **Check latest PMMS** asks our server to read Freddie 
 
 HomeStay, our post-purchase companion, is unchanged at `/homestay` (see below).
 
+A shared section bar on every page links **1 Find it** (`/find`) → **2 Fund it** (`/`, Pencil) → **3 Stay** (`/homestay`). Each section works on its own, and the presenter can open them in any order.
+
+## Find it: South OC Home Atlas (`/find`)
+
+An interactive map with two layers, starting in San Juan Capistrano.
+
+- **Buy or plan ahead**, for a first-time buyer (fictional): "I work in Irvine. Which South OC communities should I look at, what would I pay each month, how would I get to work, and who can help me next?"
+- **Future sites**, for the acquisitions lead at an OC affordable-homeownership nonprofit with no GIS staff (Lane 1's user): "Why investigate this site, which pathway might open it, and what is still unknown?" The site is **504 E Avenida San Juan**, the same parcel Pencil models, so the map explains why to look at it and Pencil shows what it would take.
+
+```bash
+npm run dev          # http://localhost:3000/find
+```
+
+**What's on the screen.** On the left: the buyer panel (income, cash, preferred monthly payment, household size, work destination, Transit/Drive), the HCD income category line, and collapsed advanced financing assumptions. On the right: a Leaflet map with OSM tiles, a legend that uses shapes as well as colors (● for sale, ■ planned or approved, ▲ potential site, ◆ rail station), filters, and a docked detail panel. Every pin also has a list card, so the list works with the keyboard alone. On mobile the map is full width and the list sits in a bottom sheet.
+
+- **Camino Twelve** (25642 Camino Del Avion, San Juan Capistrano, *Planned or approved*). Project history comes from three CEQAnet notices: the twelve-townhome approval (Aug 8, 2024), the one-affordable-home density bonus agreement (May 7, 2026), and the final tract map for individual condo sales (Oct 22, 2026). The card says **Price unpublished**. **What price would fit my budget?** returns "about $219,497–$269,667", labeled a planning estimate for this buyer and not a price for the property. Next step: ask the City's Planning Division (949-443-6331) or Housing (949-443-6313). Both are office lines listed on the city's own Development Services page.
+- **Vista Pacifica #420** (1046 Calle Del Cerro, San Clemente, *For sale*). The resale condo is listed at $475,000, with $606/mo HOA ($550/mo plus $168/quarter). For the sample buyer it comes to **$4,643/mo all-in, $2,143 above budget**, and closing leaves her **$3,750 short** of a $5,000 reserve.
+- **504 E Avenida San Juan** (*Potential site*, never shown as something to buy). The panel answers "Why investigate this site?" with 12 tests, each marked Supported, Conflict found or Unknown, with its reason, source and check date. The **fire** test is a conflict: the county LRA layer puts the parcel in a Very High fire hazard severity zone. The **existing use** test is also a conflict: SCAG code 1800 means Open Space and Recreation, but the listing sells the parcel as land. The APN, the zone's SB 9 status, the SB 9 hazard exclusions, slope, utilities, owner terms and the claimed 4-parcel approval are all Unknown. The pathway is an SB 9 split with two units per lot, which gives 4 homes (ASSUMPTION). The panel names the next call (San Clemente Planning) and has a **Does it pencil? Open in Pencil →** button.
+- **Commute, with no routing API.** Drive shows straight-line miles plus links (Google Maps directions, Caltrans QuickMap) and never shows a time. Transit shows a cached weekday example from the published timetables: train 603 leaves San Juan Capistrano at 5:56 and reaches Irvine at 6:12 (16 min station-to-station). With UC Irvine as the destination, the same train continues to Tustin at 6:20, and OCTA 473 runs 6:23 → University Center 6:41 (45 min station-to-station). The door-to-door scenario adds labeled allowances and is shown separately. Any trip without a cached example says "No cached route for this trip" and links the trip planner.
+- **Compare** holds two homes; saving a third replaces the oldest. Future sites can't be compared with homes. **Get buying guidance** links Habitat OC orientation, the CFPB housing-counselor finder (HUD's search as backup), and the city or listing page. **Copy buyer brief** produces plain text headed "BUYER BRIEF · DRAFT · FICTIONAL SAMPLE · NOTHING HAS BEEN SENT".
+- **Offline.** The only runtime request is for OSM tiles. After 3 tile errors, when the browser is offline, or on **Use offline base**, the map switches to an ivory background with the pins, the stations, a dashed "rail line (schematic, through stations)" and city labels. A banner says "Offline: street map unavailable; pin positions are still to scale."
+
+No AI runs at runtime in this feature. All math is in `lib/findit/finance.ts`, which reuses Pencil's `paymentFactor` and income tables.
+
+### Find it reference results (verified by tests)
+
+Sample buyer: 2 persons, $100,000/yr, $25,000 saved, $2,500/mo preferred (30.0% of gross monthly income). The HCD category is Low income, about 90.2% of the 2-person median ($110,900). That is an HCD category, not an eligibility decision. Defaults are in the ASSUMPTION table below, with the rate at 7.18% (PMMS 11/5/2026).
+
+| Case | Value |
+| --- | ---: |
+| Vista @ $475,000: P&I / tax / insurance / PMI | $3,121.28 / $435.42 / $150.00 / $230.38 |
+| Vista all-in (HOA $606 published + $100 assessment scenario) | **$4,643.07** ($4,543.07 without the scenario) |
+| Vista cash at closing: down / closing / total | $14,250 / $9,500 / $23,750 → $1,250 left, **short $3,750** on the reserve |
+| Fit price, HOA $350 + assessment $100 | $238,310.72 (cash cap $400,000 does not bind) |
+| Fit price range (HOA $500 + $100 → HOA $200 + $0) | $219,496.71 – $269,667.39 |
+| Fit price, no HOA or assessment | $294,752.73 |
+| Straight-line: Camino Twelve → Irvine Station / UCI / SJC Station | 12.11 / 14.11 / 1.47 mi |
+| Straight-line: Vista → Irvine Station / SC Station | 16.54 / 2.23 mi |
+| Straight-line: 504 candidate → Irvine Station / SC Station | 17.92 / 2.01 mi |
+
+### Find it sources (checked Nov 7, 2026)
+
+| Source | What we use | Document date |
+| --- | --- | --- |
+| [CEQAnet SCH 2024080316](https://ceqanet.lci.ca.gov/2024080316) | Council approval: twelve townhomes on 0.61 acre | Filed 2024-08-08 |
+| [CEQAnet SCH 2026050256](https://ceqanet.lci.ca.gov/2026050256) | Density bonus agreement: one affordable home | Filed 2026-05-07 |
+| [CEQAnet SCH 2026100816](https://ceqanet.lci.ca.gov/2026100816) | Final tract map, 12 condos, individual sales; APN 668-491-32 | Filed 2026-10-22 |
+| [SJC Planning Division](https://sanjuancapistrano.gov/216/Planning-Division), [Development Services](https://sanjuancapistrano.gov/176/Development-Services), [Housing](https://sanjuancapistrano.gov/212/Housing) | Next step and office phones (Planning 949-443-6331, Housing 949-443-6313). The site moved from .org to .gov | Unknown |
+| [Vista listing, CRMLS copy](https://marjorietakacs.firstteam.com/home-search/listings/3231452273199411278-1046-Calle-Del-Cerro-420) | Active, $475,000, 1 bd, 608 sq ft, 1986, MLS OC26195508; secondary HOA $168/quarter | Data updated 2026-11-05 |
+| [Vista listing, CLAW copy](https://canyonhaus.com/home-search/listings/1827934056164196275-1046-Calle-Del-Cerro-Unit-420) | $475,000; listing map point | Data updated 2026-10-30 |
+| [Vista listing, ERA copy](https://erabrokers.com/real-estate/property/2879964/1046-calle-del-cerro-420-san-clemente-ca) | Primary HOA $550/mo. Search snippets showed an earlier $495,000 | Unknown |
+| [Redfin](https://www.redfin.com/CA/San-Clemente/1046-Calle-del-Cerro-92672/unit-420/home/5201350) | Brianna's source ($475,000, HOA $606). It returned 403 to our check | Unknown |
+| [Listing, 504 E Avenida San Juan](https://canyonhaus.com/home-search/listings/1827937876516032324-504-E-Avenida-San-Juan) | Reused from Pencil; still active on Nov 7 | Data updated 2026-09-28 |
+| [OC Parcels](https://www.ocgis.com/arcpub/rest/services/Map_Layers/Parcels/FeatureServer) | Camino APN; no parcel carries the 504 address | Unknown |
+| [SCAG Zoning](https://maps.scag.ca.gov/scaggis/rest/services/LDX/Zoning_poly_OR/MapServer/0), [General Plan](https://maps.scag.ca.gov/scaggis/rest/services/LDX/GeneralPlan_poly_OR/MapServer/0), [Existing land use](https://maps.scag.ca.gov/scaggis/rest/services/LDX/Existinglanduse_poly_OR/MapServer/0), [Housing element sites](https://maps.scag.ca.gov/scaggis/rest/services/LDX/HousingElementSite_poly_scag/MapServer/0) | Candidate APN 690-182-12: RL, 2.861 ac, SLOPE 20 (units undocumented), DEN_MAX 4.5, LU 1800, not a housing-element site | Unknown (2024 data) |
+| [SCAG land use legend](https://maps.scag.ca.gov/2016LandUseCodesLegend.pdf) | 1800 = Open Space and Recreation | 2016 edition |
+| [OC Fire Hazard Severity Zones (LRA)](https://www.ocgis.com/arcpub/rest/services/Map_Layers/Fire_Hazard_Severity_Zones_LRA/MapServer/0) | Very High at the candidate | Unknown |
+| [FEMA NFHL layer 28](https://hazards.fema.gov/arcgis/rest/services/public/NFHL/MapServer/28) | Zone X (minimal) at one interior point | Unknown |
+| [HCD SB 9 fact sheet](https://www.hcd.ca.gov/sites/default/files/docs/planning-and-community/lot-splits-and-duplexes-sb-9.pdf) | Pathway summary (paraphrased) | April 2026 |
+| [Gov. Code 65913.4](https://leginfo.legislature.ca.gov/faces/codes_displaySection.xhtml?lawCode=GOV&sectionNum=65913.4) | SB 9 site exclusions. **Not read** (leginfo blocks automated fetch) | Unknown |
+| [San Clemente Planning](https://www.sanclemente.gov/240/Planning-Services) | Next verification step | Unknown |
+| [Metrolink OC Line schedule](https://metrolinktrains.com/schedules/?lineName=Orange+County+Line&type=line) | Train 603 times | Unknown (weekday timetable) |
+| [OCTA Route 473](https://octa.net/ebusbook/RoutePDF/route473.pdf) | 6:23 → 6:41 (approximate). The November 2026 bus-book URL returned 404 | Effective 2026-08-09 |
+| [OCTA trip planner](https://octa.net/getting-around/trip-planner/trip-planner), [Caltrans QuickMap](https://quickmap.dot.ca.gov/) | Links for trips we don't cache | Unknown |
+| [Census Geocoder](https://geocoding.geo.census.gov/geocoder/), [OSM Nominatim](https://nominatim.openstreetmap.org/) | Station, campus and building points | Unknown |
+| [Habitat OC orientation](https://habitatoc.org/attend-an-orientation/), [CFPB counselor finder](https://www.consumerfinance.gov/find-a-housing-counselor/?zipcode=92675), [HUD counselor search](https://www.hud.gov/findacounselor) | Guidance links (HTTP 200 on Nov 7) | Unknown |
+| HCD 2026 State Income Limits, Freddie Mac PMMS, HUD housing counseling | Reused from Pencil (table above) | See above |
+
+### Find it ASSUMPTIONs
+
+| Assumption | Value |
+| --- | --- |
+| Term | 30 years |
+| Down payment | 3% of price |
+| Closing costs | 2% of price |
+| Reserve kept after closing | $5,000 |
+| Property tax | 1.1% of price per year |
+| Homeowners insurance | $150/mo (matches HomeStay and Pencil) |
+| Mortgage insurance | 0.6% of the loan per year below 20% down |
+| HOA when unpublished | $350/mo scenario; range $200–$500 |
+| Special assessments / Mello-Roos when unknown | $100/mo scenario; range $0–$100 |
+| Transit allowances | 15 min to the station, 10 min to board, 10 min from the last stop to work |
+| Homes at 504 E Avenida San Juan | 4 (SB 9 split, two units per lot; also the listing's 4-parcel claim) |
+
+**Real vs mocked.** Real: the CEQAnet records, the listing facts as published, the GIS query results, and the timetable example. Assumed: the financing defaults, the HOA and assessment scenarios, the transit allowances, and the 4 homes. Fictional: the buyer.
+
+**Where Find it gets things wrong**
+- The candidate APN 690-182-12 is not confirmed. No county parcel carries the 504 address.
+- The fire layer's vintage is unknown, and CAL FIRE's 2025 LRA map was not checked.
+- The SB 9 hazard exclusions (Gov. Code 65913.4(a)(6)(B)–(K)) were not read from the statute.
+- SCAG's slope units are undocumented. The land-use code was decoded with SCAG's 2016 legend, while the layer is 2024 data.
+- The timetable is a dated example, not live. Only trains 601 and 603 stop at SJC and San Clemente in the morning on the OC Line, and other Metrolink lines were not checked.
+- The rate is a national weekly average.
+- Listing data can change at any time. Vista's price has already changed once ($495,000 → $475,000).
+- Camino Twelve's price, HOA, sales office, application window and construction status are unverified.
+- FIND_IT.md §5.1 listed the San Clemente Station distances as 2.19 and 1.95 mi. Using the §3.1 station point, the same formula gives 2.23 and 2.01 mi, and those are the values tested.
+
+**Cut for time (P1/P2):** the 317 Avenida Monterey second site, the candidate parcel polygon overlay, and the bundled TIGER basemap file.
+
+### Find it demo (about 90 seconds)
+
+1. "Two people start every affordable home: a buyer who needs a place, and a nonprofit that needs land. This map serves both, starting in San Juan Capistrano."
+2. Click **Explore with a sample buyer**. "This is a fictional household: $100,000 a year, $25,000 saved, $2,500 a month, a job at Irvine Station. Camino Twelve got city approval for 12 townhomes in August 2024. The developer signed for one affordable home in May, and the final map for individual sales was filed October 22. The price is unpublished, so we don't invent one." Click **What price would fit my budget?** "About $220,000 to $270,000. That's a planning number for this family, not a price for this home."
+3. "Train from San Juan Capistrano to Irvine: 16 minutes station to station, from the published timetable and dated. The door-to-door estimate is shown separately." Switch the destination to UC Irvine to show the Tustin transfer and the OCTA 473 leg.
+4. Save Camino Twelve and Vista Pacifica, then **Compare**. "A real $475,000 condo is $4,643 a month. That's $2,143 over budget, and closing would eat her reserve. That gap is why the affordable home matters." Click **Get buying guidance**, then **Copy buyer brief**. "Nothing is sent."
+5. Switch to **Future sites** and open 504 E Avenida San Juan. "For the acquisitions lead: SB 9 could turn this lot into four homes, and a nonprofit skips the owner-occupancy affidavit. Flood risk is minimal. Fire is Very High, and SCAG codes the parcel as open space. Those are the two conflicts to check first. The APN, the slope and the old 4-parcel approval are unknown, and we say so. The next call is San Clemente Planning." Click **Does it pencil?** "Pencil shows that even with donated land, these four homes still need about $941,000."
+6. "Every pin has a source and a date. Unknowns stay unknown."
+
 ## How Claude is used
 
 - **Built with Claude** (Claude Code and Kiro): research of the sources below, the TypeScript math and its tests, the UI, and this README. Source figures come from the team's Nov 7, 2026 reading of each official page (dates in the table below). The reference results were recomputed independently before they became test anchors.
@@ -55,11 +163,11 @@ Requires Node.js 20.9 or newer (tested on Node 24). No API key, account, or inte
 
 ```bash
 npm ci
-npm run dev          # http://localhost:3000 (Pencil);  http://localhost:3000/homestay (HomeStay)
+npm run dev          # http://localhost:3000 (Pencil);  /find (Find it);  /homestay (HomeStay)
 ```
 
 ```bash
-npm run check        # typecheck + lint + 126 Vitest tests (83 HomeStay, 43 Pencil)
+npm run check        # typecheck + lint + 160 Vitest tests (43 Find it, 117 Pencil and HomeStay)
 npm run build && npm start
 ```
 
@@ -167,7 +275,7 @@ Left out: CalHFA Forgivable Equity Builder (no official URL found), employer-ass
 
 ## Data and privacy
 
-No personal information. The household is fictional. From the listing we keep only the URL, check date, price, size, status and description, not the agent's contact details. Nothing is stored, sent, filed or submitted. Pencil makes no network requests at runtime unless you click **Check latest PMMS**, which makes one server-side request to freddiemac.com. Links open official pages in a new tab.
+No personal information. The household is fictional. From the listing we keep only the URL, check date, price, size, status and description, not the agent's contact details. Nothing is stored, sent, filed or submitted. Pencil makes no network requests at runtime unless you click **Check latest PMMS**, which makes one server-side request to freddiemac.com. Find it's only runtime request is for OpenStreetMap tiles from the browser. Its buyer inputs stay in browser memory, and it stores organizational contacts only, with no staff, agent or applicant names. Links open official pages in a new tab.
 
 ## License
 
@@ -191,6 +299,19 @@ lib/fundit/program-extraction.ts   Program re-check: prompt, schema, quote valid
 app/api/recheck-program/route.ts   Program re-check endpoint (consent required for AI; fixture offline)
 components/fundit/recheck.tsx      Paste, extract, confirm UI
 tests/fundit-*.test.ts             §5.4 / §5.5 anchors, catalog, memo, state
+components/section-nav.tsx         Shared nav: 1 Find it · 2 Fund it · 3 Stay
+app/find/page.tsx                  Find it: South OC Home Atlas
+components/findit/                 atlas-app.tsx (panel, list, detail, compare, brief, mobile sheet),
+                                   atlas-map.tsx (Leaflet, OSM / offline base, pins), site-panel.tsx, bits.tsx, atlas.css
+lib/findit/sources.ts              Every Find it source: URL, document date, check date (reuses Pencil's where shared)
+lib/findit/data.ts                 Stations, destinations, Camino Twelve, Vista Pacifica, 504 site tests, guidance
+lib/findit/finance.ts              Monthly cost, cash at closing, fit price, haversine
+lib/findit/commute.ts              Cached timetable examples, drive links, route-unavailable state
+lib/findit/filters.ts              Layer / budget / city / status / unpublished filtering + no-results reason
+lib/findit/brief.ts                Buyer brief text
+lib/findit/state.ts                Pure reducer (sample reset, compare max 2)
+public/find-it/CREDITS.md          Map and data credits
+tests/findit-*.test.ts             §5.1 anchors, data rules, filters, commute, brief, state
 ```
 
 ---
