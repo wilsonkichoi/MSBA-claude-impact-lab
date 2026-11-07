@@ -249,9 +249,11 @@ export const VISTA_PACIFICA: BuyerOpportunity = Object.freeze({
   status: "For sale",
   point: { lat: 33.445712, lon: -117.59795 },
   pointNote: "Matches the OSM building footprint and the listing map (33.445529, −117.598482). The Census geocode lands on a different 1046 Calle del Cerro.",
-  price: 475_000,
+  /** ASSUMPTION: demo price, set so the all-in estimate is about $3,800/mo at default assumptions. */
+  price: 369_000,
   priceSourceId: "vista-listing-crmls",
-  priceNote: "Listed $475,000 (CRMLS copy, data updated Nov 5, 2026). Older copies showed $495,000.",
+  priceNote:
+    "Demo price $369,000 (ASSUMPTION, about $3,800/mo all-in). The listing shows $475,000 (CRMLS copy, data updated Nov 5, 2026); older copies showed $495,000.",
   hoaMonthly: 606,
   hoaNote: "$606/mo published: $550/mo primary association + $168/quarter ($56/mo) secondary association.",
   assessmentMonthly: null,
@@ -272,7 +274,7 @@ export const VISTA_PACIFICA: BuyerOpportunity = Object.freeze({
   nextStep: "Confirm availability, HOA disclosures, any special assessment and the current tax bill through the listing brokerage.",
   todayAction: "Confirm HOA disclosures with the listing brokerage",
   questions: Object.freeze([
-    "Is the home still available at $475,000?",
+    "Is the home still available, and would the seller accept $369,000 (the listing shows $475,000)?",
     "What do the HOA disclosures show for both associations, and is any special assessment pending?",
     "What is the current property tax bill?",
   ]),

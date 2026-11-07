@@ -1,15 +1,15 @@
 import Link from "next/link";
 
 /**
- * Shared section nav (FIND_IT.md §0, §7): 1 Find it → 2 Fund it → 3 Stay.
+ * Shared section nav (FIND_IT.md §0, §7): 1 Find it → 2 Finance → 3 Stay.
  * Slim bar above each app's own header. Inline styles only, so no page's CSS changes.
  */
 
-export type SectionId = "find" | "fund" | "stay";
+export type SectionId = "find" | "finance" | "stay";
 
 const SECTIONS: readonly { id: SectionId; n: number; href: string; name: string; question: string }[] = [
   { id: "find", n: 1, href: "/find", name: "Find it", question: "where could a home go?" },
-  { id: "fund", n: 2, href: "/", name: "Fund it", question: "what would it take?" },
+  { id: "finance", n: 2, href: "/", name: "Finance", question: "close the gap" },
   { id: "stay", n: 3, href: "/homestay", name: "Stay", question: "keep the home affordable" },
 ];
 

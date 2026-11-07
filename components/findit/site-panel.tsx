@@ -146,7 +146,7 @@ export function SitePanel({ site }: { site: FutureSite }) {
 
       <div className="rounded-md bg-[#2b1d14] p-3 text-[#fffdf8]">
         <Link
-          href="/"
+          href="/pencil"
           className="inline-flex items-center rounded-md bg-[#e9d9b4] px-3 py-2 text-sm font-bold text-[#2b1d14] hover:bg-[#f3e7c9]"
         >
           Does it pencil? Open in Pencil →

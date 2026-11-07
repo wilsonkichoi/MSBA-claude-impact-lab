@@ -21,26 +21,25 @@ describe("§5.1 reference results", () => {
     expect(budgetShare(BUDGET, 100_000)).toBeCloseTo(0.3, 10);
   });
 
-  it("Vista Pacifica @ $475,000, HOA $606 published, assessment scenario $100", () => {
-    expect(VISTA_PACIFICA.price).toBe(475_000);
+  it("Vista Pacifica @ $369,000 demo price (about $3,800/mo), HOA $606 published, assessment scenario $100", () => {
+    expect(VISTA_PACIFICA.price).toBe(369_000);
     expect(VISTA_PACIFICA.hoaMonthly).toBe(606);
-    const e = estimateMonthly(475_000, 606, null, CASH, A);
-    expect(e.principalInterest).toBeCloseTo(3121.28, CENT);
-    expect(e.tax).toBeCloseTo(435.42, CENT);
+    const e = estimateMonthly(369_000, 606, null, CASH, A);
+    expect(e.principalInterest).toBeCloseTo(2424.74, CENT);
+    expect(e.tax).toBeCloseTo(338.25, CENT);
     expect(e.insurance).toBe(150);
-    expect(e.pmi).toBeCloseTo(230.38, CENT);
+    expect(e.pmi).toBeCloseTo(178.97, CENT);
     expect(e.assessmentIsScenario).toBe(true);
     expect(e.hoaIsScenario).toBe(false);
-    expect(e.monthly).toBeCloseTo(4643.07, CENT);
-    expect(e.monthly - e.assessment).toBeCloseTo(4543.07, CENT);
-    expect(e.down).toBeCloseTo(14_250, CENT);
-    expect(e.closing).toBeCloseTo(9_500, CENT);
-    expect(e.cashAtClose).toBeCloseTo(23_750, CENT);
-    expect(e.left).toBeCloseTo(1_250, CENT);
-    expect(e.shortOfReserve).toBeCloseTo(3_750, CENT);
+    expect(e.monthly).toBeCloseTo(3797.96, CENT);
+    expect(e.down).toBeCloseTo(11_070, CENT);
+    expect(e.closing).toBeCloseTo(7_380, CENT);
+    expect(e.cashAtClose).toBeCloseTo(18_450, CENT);
+    expect(e.left).toBeCloseTo(6_550, CENT);
+    expect(e.shortOfReserve).toBe(0);
     const s = fitSentence(e.monthly, BUDGET);
     expect(s.kind).toBe("above");
-    expect(Math.round(s.amount!)).toBe(2143);
+    expect(Math.round(s.amount!)).toBe(1298);
   });
 
   it("fit price with HOA $350 + assessment $100", () => {

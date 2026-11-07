@@ -24,7 +24,7 @@ The finance lead at an OC affordable-homeownership nonprofit (a role, not a real
 
 Video: _VIDEO LINK TO ADD_
 
-One screen at `/`, for one real property: **504 E Avenida San Juan, San Clemente** (public listing, $5,900,000 asking, 2.82 acres, listing claims a prior 4-parcel approval).
+One screen at `/pencil` (it was at `/` before the buyer-facing Finance page took that route), for one real property: **504 E Avenida San Juan, San Clemente** (public listing, $5,900,000 asking, 2.82 acres, listing claims a prior 4-parcel approval).
 
 1. **Decision card.** "At the $5,900,000 asking price, building 4 homes on 504 E Avenida San Juan (a 2.82-acre lot) does not pencil. Land is $1,475,000 per home and building is $500,000 per home (ASSUMPTION). A family at 72.2% of AMI can pay about $264,711 per home. Even with donated land, the project still needs $941,157 ($235,289 per home). Verify first: the $2,000,000 development budget. A 10% miss moves the gap by $200,000." Tiles: gap per home with free land (largest), max land price supported (none: −$941,157), cash needed at land closing. A green line shows the current path to $0 (item 2).
 2. **What would it take to reach $0?** Two parts, both scenario only:
@@ -42,7 +42,24 @@ Optional live rate check: **Check latest PMMS** asks our server to read Freddie 
 
 HomeStay, our post-purchase companion, is unchanged at `/homestay` (see below).
 
-A shared section bar on every page links **1 Find it** (`/find`) → **2 Fund it** (`/`, Pencil) → **3 Stay** (`/homestay`). Each section works on its own, and the presenter can open them in any order.
+A shared section bar on every page links **1 Find it** (`/find`) → **2 Finance** (`/`) → **3 Stay** (`/homestay`). Pencil is linked from the Finance footer and from the future-site panel. Each section works on its own, and the presenter can open them in any order.
+
+## Finance: close the gap (`/`)
+
+A buyer-facing page in HomeStay's style. Find it's **Compare saved homes** panel has a **Choose this home** option and a **Finance options →** button that opens `/` with the chosen home and the buyer's inputs in the URL (income, cash, budget, household size, and any changed assumptions). Nothing is sent; the page validates every parameter and falls back to the sample buyer.
+
+1. **Home and household.** Pick Vista Pacifica #420 or Camino Twelve, edit the price, and edit the buyer.
+2. **Your gap.** Monthly estimate without help → with the plan, how far over budget it still is, the down-payment help needed to reach the budget, and the highest price the plan supports. For an unpriced home it shows the price that fits, with and without the plan.
+3. **Programs.** WISH, OC MAP, CalHFA MyHome and Dream For All from Pencil's catalog, each with an estimate for this buyer, its availability in the home's city, what's still unknown and the official link. Checking a program adds it to the plan. Programs that can't apply (MAP in San Clemente, Santa Ana's My First Home) are listed separately and count $0.
+
+Model (ASSUMPTIONS, shown on the page): every program dollar lowers the first mortgage; deferred loans have no monthly payment; mortgage insurance applies while the first mortgage is over 80% of price; MyHome is estimated at 3% of price because its page states no amount. Logic is in `lib/buyer-finance.ts`.
+
+| Sample buyer, default assumptions | Value |
+| --- | ---: |
+| Vista @ $369,000, no help | $3,798/mo, $1,298 over budget; help needed ≈ $165,181 |
+| Vista + WISH ($32,837, default plan) | $3,559/mo |
+| Vista + WISH + MyHome + Dream For All | $2,822/mo, still $322 over |
+| Camino Twelve (unpriced): price that fits without help → with WISH + OC MAP | $238,311 → $392,021 |
 
 ## Find it: South OC Home Atlas (`/find`)
 
@@ -58,10 +75,10 @@ npm run dev          # http://localhost:3000/find
 **What's on the screen.** On the left: the buyer panel (income, cash, preferred monthly payment, household size, work destination, Transit/Drive), the HCD income category line, and collapsed advanced financing assumptions. On the right: a Leaflet map with OSM tiles, a legend that uses shapes as well as colors (● for sale, ■ planned or approved, ▲ potential site, ◆ rail station), filters, and a docked detail panel. Every pin also has a list card, so the list works with the keyboard alone. On mobile the map is full width and the list sits in a bottom sheet.
 
 - **Camino Twelve** (25642 Camino Del Avion, San Juan Capistrano, *Planned or approved*). Project history comes from three CEQAnet notices: the twelve-townhome approval (Aug 8, 2024), the one-affordable-home density bonus agreement (May 7, 2026), and the final tract map for individual condo sales (Oct 22, 2026). The card says **Price unpublished**. **What price would fit my budget?** returns "about $219,497–$269,667", labeled a planning estimate for this buyer and not a price for the property. Next step: ask the City's Planning Division (949-443-6331) or Housing (949-443-6313). Both are office lines listed on the city's own Development Services page.
-- **Vista Pacifica #420** (1046 Calle Del Cerro, San Clemente, *For sale*). The resale condo is listed at $475,000, with $606/mo HOA ($550/mo plus $168/quarter). For the sample buyer it comes to **$4,643/mo all-in, $2,143 above budget**, and closing leaves her **$3,750 short** of a $5,000 reserve.
+- **Vista Pacifica #420** (1046 Calle Del Cerro, San Clemente, *For sale*). The resale condo is listed at $475,000; the demo uses **$369,000** (ASSUMPTION, labeled on the card) so the estimate is about $3,800/mo. HOA is $606/mo ($550/mo plus $168/quarter). For the sample buyer it comes to **$3,798/mo all-in, $1,298 above budget**, and closing leaves $6,550, enough for the $5,000 reserve.
 - **504 E Avenida San Juan** (*Potential site*, never shown as something to buy). The panel answers "Why investigate this site?" with 12 tests, each marked Supported, Conflict found or Unknown, with its reason, source and check date. The **fire** test is a conflict: the county LRA layer puts the parcel in a Very High fire hazard severity zone. The **existing use** test is also a conflict: SCAG code 1800 means Open Space and Recreation, but the listing sells the parcel as land. The APN, the zone's SB 9 status, the SB 9 hazard exclusions, slope, utilities, owner terms and the claimed 4-parcel approval are all Unknown. The pathway is an SB 9 split with two units per lot, which gives 4 homes (ASSUMPTION). The panel names the next call (San Clemente Planning) and has a **Does it pencil? Open in Pencil →** button.
 - **Commute, with no routing API.** Drive shows straight-line miles plus links (Google Maps directions, Caltrans QuickMap) and never shows a time. Transit shows a cached weekday example from the published timetables: train 603 leaves San Juan Capistrano at 5:56 and reaches Irvine at 6:12 (16 min station-to-station). With UC Irvine as the destination, the same train continues to Tustin at 6:20, and OCTA 473 runs 6:23 → University Center 6:41 (45 min station-to-station). The door-to-door scenario adds labeled allowances and is shown separately. Any trip without a cached example says "No cached route for this trip" and links the trip planner.
-- **Compare** holds two homes; saving a third replaces the oldest. Future sites can't be compared with homes. **Get buying guidance** links Habitat OC orientation, the CFPB housing-counselor finder (HUD's search as backup), and the city or listing page. **Copy buyer brief** produces plain text headed "BUYER BRIEF · DRAFT · FICTIONAL SAMPLE · NOTHING HAS BEEN SENT".
+- **Compare** holds two homes; saving a third replaces the oldest. Future sites can't be compared with homes. Choose one home in the panel and click **Finance options →** to open the Finance page for it. **Get buying guidance** links Habitat OC orientation, the CFPB housing-counselor finder (HUD's search as backup), and the city or listing page. **Copy buyer brief** produces plain text headed "BUYER BRIEF · DRAFT · FICTIONAL SAMPLE · NOTHING HAS BEEN SENT".
 - **Offline.** The only runtime request is for OSM tiles. After 3 tile errors, when the browser is offline, or on **Use offline base**, the map switches to an ivory background with the pins, the stations, a dashed "rail line (schematic, through stations)" and city labels. A banner says "Offline: street map unavailable; pin positions are still to scale."
 
 No AI runs at runtime in this feature. All math is in `lib/findit/finance.ts`, which reuses Pencil's `paymentFactor` and income tables.
@@ -72,9 +89,9 @@ Sample buyer: 2 persons, $100,000/yr, $25,000 saved, $2,500/mo preferred (30.0% 
 
 | Case | Value |
 | --- | ---: |
-| Vista @ $475,000: P&I / tax / insurance / PMI | $3,121.28 / $435.42 / $150.00 / $230.38 |
-| Vista all-in (HOA $606 published + $100 assessment scenario) | **$4,643.07** ($4,543.07 without the scenario) |
-| Vista cash at closing: down / closing / total | $14,250 / $9,500 / $23,750 → $1,250 left, **short $3,750** on the reserve |
+| Vista @ $369,000 (demo price): P&I / tax / insurance / PMI | $2,424.74 / $338.25 / $150.00 / $178.97 |
+| Vista all-in (HOA $606 published + $100 assessment scenario) | **$3,797.96** |
+| Vista cash at closing: down / closing / total | $11,070 / $7,380 / $18,450 → $6,550 left, reserve kept |
 | Fit price, HOA $350 + assessment $100 | $238,310.72 (cash cap $400,000 does not bind) |
 | Fit price range (HOA $500 + $100 → HOA $200 + $0) | $219,496.71 – $269,667.39 |
 | Fit price, no HOA or assessment | $294,752.73 |
@@ -146,7 +163,7 @@ Sample buyer: 2 persons, $100,000/yr, $25,000 saved, $2,500/mo preferred (30.0% 
 1. "Two people start every affordable home: a buyer who needs a place, and a nonprofit that needs land. This map serves both, starting in San Juan Capistrano."
 2. Click **Explore with a sample buyer**. "This is a fictional household: $100,000 a year, $25,000 saved, $2,500 a month, a job at Irvine Station. Camino Twelve got city approval for 12 townhomes in August 2024. The developer signed for one affordable home in May, and the final map for individual sales was filed October 22. The price is unpublished, so we don't invent one." Click **What price would fit my budget?** "About $220,000 to $270,000. That's a planning number for this family, not a price for this home."
 3. "Train from San Juan Capistrano to Irvine: 16 minutes station to station, from the published timetable and dated. The door-to-door estimate is shown separately." Switch the destination to UC Irvine to show the Tustin transfer and the OCTA 473 leg.
-4. Save Camino Twelve and Vista Pacifica, then **Compare**. "A real $475,000 condo is $4,643 a month. That's $2,143 over budget, and closing would eat her reserve. That gap is why the affordable home matters." Click **Get buying guidance**, then **Copy buyer brief**. "Nothing is sent."
+4. Save Camino Twelve and Vista Pacifica, then **Compare**. "At $369,000 this condo is about $3,800 a month, $1,298 over budget." Choose Vista Pacifica and click **Finance options →**. "WISH alone brings it to $3,559. Add MyHome and Dream For All and it's $2,822. In San Clemente, OC MAP doesn't apply; switch to Camino Twelve in San Juan Capistrano and MAP raises the price she can afford from $238,000 to $392,000." Back on Find it, click **Get buying guidance**, then **Copy buyer brief**. "Nothing is sent."
 5. Switch to **Future sites** and open 504 E Avenida San Juan. "For the acquisitions lead: SB 9 could turn this lot into four homes, and a nonprofit skips the owner-occupancy affidavit. Flood risk is minimal. Fire is Very High, and SCAG codes the parcel as open space. Those are the two conflicts to check first. The APN, the slope and the old 4-parcel approval are unknown, and we say so. The next call is San Clemente Planning." Click **Does it pencil?** "Pencil shows that even with donated land, these four homes still need about $941,000."
 6. "Every pin has a source and a date. Unknowns stay unknown."
 
@@ -163,7 +180,7 @@ Requires Node.js 20.9 or newer (tested on Node 24). No API key, account, or inte
 
 ```bash
 npm ci
-npm run dev          # http://localhost:3000 (Pencil);  /find (Find it);  /homestay (HomeStay)
+npm run dev          # http://localhost:3000 (Finance);  /find (Find it);  /pencil (Pencil);  /homestay (HomeStay)
 ```
 
 ```bash

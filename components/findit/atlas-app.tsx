@@ -5,7 +5,9 @@
  * All state lives in this browser tab. Nothing is sent. No AI at runtime.
  */
 
+import Link from "next/link";
 import { useCallback, useMemo, useReducer, useRef, useState, type ReactNode, type RefObject } from "react";
+import { financeHref } from "@/lib/buyer-finance";
 import {
   ASK_TEXT,
   DESTINATIONS,
@@ -1137,6 +1139,9 @@ function Step({ n, children }: { n: number; children: ReactNode }) {
 function ComparePanel({ state, onClose }: { state: AtlasState; onClose: () => void }) {
   const homes = state.saved.map((id) => OPP_BY_ID[id]).filter((o): o is BuyerOpportunity => !!o && o.layer === "buyer");
   const { inputs, assumptions: a } = state;
+  const [choice, setChoice] = useState<string | null>(null);
+  // A single saved home is the choice; with two, the buyer picks one.
+  const chosen = homes.find((o) => o.id === choice) ?? (homes.length === 1 ? homes[0]! : null);
   return (
     <section aria-labelledby="compare-h">
       <div className="flex items-center justify-between gap-2">
@@ -1156,8 +1161,19 @@ function ComparePanel({ state, onClose }: { state: AtlasState; onClose: () => vo
             <tr>
               <th scope="col" className="w-36 py-1" />
               {homes.map((o) => (
-                <th key={o.id} scope="col" className="atlas-serif py-1 text-base">
-                  {o.name}
+                <th key={o.id} scope="col" className="py-1 pr-2 align-bottom">
+                  <span className="atlas-serif block text-base">{o.name}</span>
+                  <label className="mt-1 inline-flex cursor-pointer items-center gap-1.5 text-xs font-semibold">
+                    <input
+                      type="radio"
+                      name="compare-choice"
+                      value={o.id}
+                      checked={chosen?.id === o.id}
+                      onChange={() => setChoice(o.id)}
+                      className="h-3.5 w-3.5 accent-[#2b1d14]"
+                    />
+                    Choose this home
+                  </label>
                 </th>
               ))}
             </tr>
@@ -1207,6 +1223,22 @@ function ComparePanel({ state, onClose }: { state: AtlasState; onClose: () => vo
             ))}
           </tbody>
         </table>
+      </div>
+      <div className="mt-3 flex flex-wrap items-center gap-3 rounded-md bg-[#f7f2e8] p-3">
+        {chosen ? (
+          <Link href={financeHref(chosen.id, inputs, a)} className={btnPrimary}>
+            Finance options →
+          </Link>
+        ) : (
+          <button type="button" className={btnPrimary} disabled>
+            Finance options →
+          </button>
+        )}
+        <p className="text-sm text-[#4e4033]">
+          {chosen
+            ? `See which assistance programs could close the gap for ${chosen.name}. Your inputs go along in the link; nothing is sent.`
+            : "Choose a home above to see finance options."}
+        </p>
       </div>
       <p className="mt-2 text-xs text-[#6b5a4c]">Future sites can&apos;t be compared with buyer homes. Compare homes with homes.</p>
     </section>
