@@ -171,6 +171,23 @@ npm run check        # typecheck + lint + 160 Vitest tests (43 Find it, 117 Penc
 npm run build && npm start
 ```
 
+### Windows
+
+The same commands work in PowerShell or Command Prompt. Windows hasn't been tested on a real machine; a simulated Windows (CRLF) checkout passes `npm run check`.
+
+1. Install [Node.js](https://nodejs.org/) 20.9 or newer (LTS installer, or `winget install OpenJS.NodeJS.LTS`) and [Git for Windows](https://git-scm.com/download/win).
+2. Clone into a normal folder such as `C:\src`. Avoid OneDrive-synced folders, because syncing `node_modules` is very slow.
+   ```powershell
+   git clone https://github.com/wilsonkichoi/MSBA-claude-impact-lab.git
+   cd MSBA-claude-impact-lab
+   npm ci
+   npm run dev
+   ```
+   Open http://localhost:3000/find, http://localhost:3000/ and http://localhost:3000/homestay.
+3. If PowerShell says "running scripts is disabled on this system", use Command Prompt or type `npm.cmd` instead of `npm` (for example `npm.cmd ci`).
+4. Line endings: `.gitattributes` keeps LF on checkout. If you cloned before it was added (Nov 7, 2026) and `npm run check` fails two sample-notice tests, clone the repo again into a new folder.
+5. For HomeStay's optional AI extraction on Windows, use the `anthropic` backend (`ANTHROPIC_API_KEY` in `.env.local`; create it with `copy .env.example .env.local`). The local `claude-cli` and `codex-cli` backends look for the command without an `.exe` or `.cmd` extension, so they show as "AI off" on Windows. None of the demos need AI.
+
 ### Demo (about 90 seconds)
 
 1. Open `/`: $5.9M asking, 4 homes, sources and ASSUMPTION chips visible.

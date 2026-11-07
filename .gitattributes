@@ -1,0 +1,5 @@
+# Keep LF line endings on every OS (including Windows with core.autocrlf=true).
+# Two HomeStay tests compare public/samples/*.txt byte-for-byte with the in-code sample text.
+* text=auto eol=lf
+*.png binary
+*.pdf binary
