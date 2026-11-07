@@ -20,6 +20,8 @@ export type Source = {
   /** ISO date that applies to the document itself, or null when the source gives none (shown as "Unknown"). */
   date: string | null;
   dateKind: DateKind;
+  /** Text for a date that is not a calendar date (e.g. a statute's chapter reference). */
+  dateText?: string;
   /** ISO date someone on the team read the page. */
   checkedDate: string;
   /** How we used it, and any caveat (unofficial copy, search results only, etc.). */
@@ -55,6 +57,7 @@ const list = [
     url: "https://leginfo.legislature.ca.gov/faces/codes_displaySection.xhtml?lawCode=HSC&sectionNum=50052.5",
     date: null,
     dateKind: "last amended",
+    dateText: "Stats. 2017, Ch. 418",
     checkedDate: CHECKED,
     note: "Last amended Stats. 2017, Ch. 418. Paraphrased in the app. Applies only if the project's assistance requires it.",
   },
@@ -226,5 +229,5 @@ export const SOURCE_LIST: readonly Source[] = Object.freeze(list.map((s) => SOUR
 /** "memo dated 2026-06-23" / "last amended: Unknown" style label. */
 export function sourceDateLabel(s: Source): string {
   if (s.dateKind === "not stated") return "Document date: Unknown";
-  return `${s.dateKind[0]!.toUpperCase()}${s.dateKind.slice(1)} ${s.date ?? "Unknown"}`;
+  return `${s.dateKind[0]!.toUpperCase()}${s.dateKind.slice(1)} ${s.date ?? s.dateText ?? "Unknown"}`;
 }
