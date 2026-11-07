@@ -94,6 +94,15 @@ export function buildMemo(state: PencilState): string {
     `Base gap counts only Committed amounts: ${usd(r.gap)}. If candidates with stated amounts came through: ${usd(cand.gap)} (${totals.unknownCount} candidate${totals.unknownCount === 1 ? "" : "s"} with Unknown or conditional amounts excluded).`,
   );
 
+  const confirmed = Object.entries(state.rechecks).flatMap(([id, fields]) => {
+    const name = totals.evaluations.find((e) => e.source.id === id)?.source.name ?? id;
+    return fields.map((f) => `- ${name}, ${f.field}: "${f.quote}" (pasted page text, ${f.mode === "demo-fixture" ? "demo fixture, no AI call" : "AI-extracted"}; confirmed by a person; does not change any number)`);
+  });
+  if (confirmed.length > 0) {
+    h("Program re-checks confirmed by a person");
+    L.push(...confirmed);
+  }
+
   h("Open questions");
   const qs = new Set<string>([
     ...SAN_CLEMENTE.openQuestions,

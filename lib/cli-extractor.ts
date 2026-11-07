@@ -176,7 +176,24 @@ export function findOnPath(name: string, pathVar: string | undefined): string | 
   return null;
 }
 
+/**
+ * Optional override so another feature (Pencil's program re-check) can reuse these
+ * backends with its own prompt and output schema. Omitted → HomeStay's notice task.
+ */
+export type ExtractionTask = {
+  systemPrompt: string;
+  jsonSchema: Record<string, unknown>;
+  /** Wraps the untrusted text in tags for the model. */
+  wrap: (text: string) => string;
+};
+
+function noticeTask(): ExtractionTask {
+  return { systemPrompt: EXTRACTION_SYSTEM_PROMPT, jsonSchema: modelOutputJsonSchema(), wrap: noticeMessage };
+}
+
 type CliExtractorOptions = {
+  /** Prompt and schema; defaults to HomeStay's notice extraction. */
+  task?: ExtractionTask;
   /** Executable path (resolved from PATH by the caller). */
   command: string;
   model?: string;
@@ -206,15 +223,15 @@ export function parseClaudeCliOutput(stdout: string): unknown {
   return result.structured_output;
 }
 
-export function claudeCliArgs(model?: string): string[] {
+export function claudeCliArgs(model?: string, task: ExtractionTask = noticeTask()): string[] {
   const args = [
     "-p",
     "--output-format",
     "json",
     "--json-schema",
-    JSON.stringify(modelOutputJsonSchema()),
+    JSON.stringify(task.jsonSchema),
     "--system-prompt",
-    EXTRACTION_SYSTEM_PROMPT,
+    task.systemPrompt,
     // No built-in tools, no MCP servers, no user customizations (CLAUDE.md, hooks, plugins, skills).
     "--tools",
     "",
@@ -230,13 +247,14 @@ export function claudeCliArgs(model?: string): string[] {
 }
 
 export function createClaudeCliExtractor(opts: CliExtractorOptions): ModelExtractor {
-  const args = claudeCliArgs(opts.model);
+  const task = opts.task ?? noticeTask();
+  const args = claudeCliArgs(opts.model, task);
   return (text, signal) =>
     withTempWorkspace(async ({ work }) => {
       const stdout = await runCli({
         command: opts.command,
         args,
-        input: noticeMessage(text),
+        input: task.wrap(text),
         cwd: work,
         env: childEnv(opts.env ?? process.env, ["ANTHROPIC_", "CLAUDE_"]),
         timeoutMs: opts.timeoutMs ?? CLI_TIMEOUT_MS + HARD_KILL_GRACE_MS,
@@ -292,17 +310,18 @@ export function codexCliArgs(dirs: { work: string; schemaPath: string; outputPat
 }
 
 export function createCodexCliExtractor(opts: CliExtractorOptions): ModelExtractor {
+  const task = opts.task ?? noticeTask();
   return (text, signal) =>
     withTempWorkspace(async ({ work, io }) => {
       const schemaPath = path.join(io, "output-schema.json");
       const outputPath = path.join(io, "last-message.json");
-      await writeFile(schemaPath, JSON.stringify(modelOutputJsonSchema()), { mode: 0o600 });
+      await writeFile(schemaPath, JSON.stringify(task.jsonSchema), { mode: 0o600 });
 
       await runCli({
         command: opts.command,
         args: codexCliArgs({ work, schemaPath, outputPath }, opts.model),
         // Codex has no separate system prompt flag, so instructions and the notice both go on stdin.
-        input: `${EXTRACTION_SYSTEM_PROMPT}\n\n${noticeMessage(text)}`,
+        input: `${task.systemPrompt}\n\n${task.wrap(text)}`,
         cwd: work,
         env: childEnv(opts.env ?? process.env, ["OPENAI_", "CODEX_"]),
         timeoutMs: opts.timeoutMs ?? CLI_TIMEOUT_MS + HARD_KILL_GRACE_MS,

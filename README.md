@@ -42,7 +42,8 @@ HomeStay, our post-purchase companion, is unchanged at `/homestay` (see below).
 ## How Claude is used
 
 - **Built with Claude** (Claude Code and Kiro): research of the sources below, the TypeScript math and its tests, the UI, and this README. Source figures come from the team's Nov 7, 2026 reading of each official page (dates in the table below). The reference results were recomputed independently before they became test anchors.
-- **At runtime, Pencil uses no AI.** All prices, gaps, eligibility-area checks and rankings are deterministic TypeScript in `lib/fundit/`. The planned "re-check a program from its page" extraction (reusing HomeStay's validated pipeline) was not built.
+- **AI never computes.** All prices, gaps, eligibility-area checks and rankings are deterministic TypeScript in `lib/fundit/`.
+- **Re-check a program from its page (optional runtime Claude).** The finance lead pastes text from an official program page. Claude extracts only stated fields (maximum amount, recipient, eligible areas, income limit, deadline, funds available), each with a verbatim quote of at most 30 words. The server validates the JSON with Zod and drops any field whose quote is not in the pasted text or is too long. A person clicks "I checked this against the page: confirm" before a field appears on the card, and confirmed fields never change a number. It reuses HomeStay's backends (`EXTRACTOR=anthropic | claude-cli | codex-cli`, same consent text and safety rules) with its own prompt and schema (`lib/fundit/program-extraction.ts`, `app/api/recheck-program`). Offline, **Use demo excerpt (OC MAP)** loads two short verbatim excerpts from the OC HCD page (the $120,000 line and the eligible-area list), labeled "Demo fixture, no AI call". The live AI path has not been run against a real backend at the event; only the fixture and the validation rules were exercised.
 - **What a person checks:** every source figure before changing a number; whether the funder requires 50052.5; the listing status and the City's view on 4 parcels; the development budget; each program's current amount and funding before marking it Committed.
 
 ## Try it
@@ -149,13 +150,14 @@ Left out: CalHFA Forgivable Equity Builder (no official URL found), employer-ass
 - The OC MAP amount conflict ($120,000 vs $80,000 / 20%) is unresolved.
 - The CalHFA MyHome amount is not confirmed.
 - Cash at land closing uses a "received by land closing" checkbox, not real dates.
+- Confirmed program re-checks are shown next to the static catalog entry; they do not update the geography rule or the amounts, so a changed page still needs a code update to the catalog.
 
 ## Next steps
 
 - Ask the Habitat and nonprofit mentors which number they need first (permanent subsidy per home, cash by closing, or max land offer) and make it the big tile.
 - Itemize the reserve and the development budget.
 - The 100-project path: dated income and rate tables updated once for everyone, one property file per site, and a shared source catalog with check dates, so each new site is a data file, not a new spreadsheet.
-- "Re-check a program from its page": paste official text, extract stated fields with verbatim quotes (HomeStay's validated pipeline), person confirms before a card changes.
+- Let confirmed program re-checks propose a catalog edit (with the quote and date) for a person to accept.
 
 ## Data and privacy
 
@@ -178,6 +180,9 @@ lib/fundit/catalog.ts              Funding sources, geography check, committed /
 lib/fundit/property.ts             San Clemente snapshot, synthetic-deal check
 lib/fundit/memo.ts                 Funder memo text
 lib/fundit/state.ts                Pure reducer and Reset
+lib/fundit/program-extraction.ts   Program re-check: prompt, schema, quote validation, OC MAP demo fixture
+app/api/recheck-program/route.ts   Program re-check endpoint (consent required for AI; fixture offline)
+components/fundit/recheck.tsx      Paste, extract, confirm UI
 tests/fundit-*.test.ts             §5.4 / §5.5 anchors, catalog, memo, state
 ```
 

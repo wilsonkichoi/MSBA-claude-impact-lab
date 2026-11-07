@@ -4,6 +4,7 @@ import { useMemo, useState, type Dispatch } from "react";
 import { ASSISTANCE_RESOURCES } from "@/lib/assistance";
 import { LEAD_STATUS_LABEL, OC_MAP_ELIGIBLE_AREAS, type CatalogTotals, type LeadStatus, type SourceEvaluation } from "@/lib/fundit/catalog";
 import { buildMemo } from "@/lib/fundit/memo";
+import { PROGRAM_FIELD_LABEL } from "@/lib/fundit/program-extraction";
 import { computeProject, type GiftLine, type PencilInputs } from "@/lib/fundit/project";
 import { SAN_CLEMENTE } from "@/lib/fundit/property";
 import { daysBetween, LATEST_PMMS, PMMS_STALE_DAYS } from "@/lib/fundit/rates";
@@ -16,7 +17,7 @@ import { NumberField, Segmented } from "./bits";
 const usd = formatUSDWhole;
 const STATUSES: LeadStatus[] = ["to-verify", "not-eligible", "applied", "committed"];
 
-function SourceCard({ ev, dispatch }: { ev: SourceEvaluation; dispatch: Dispatch<PencilAction> }) {
+function SourceCard({ ev, dispatch, rechecks }: { ev: SourceEvaluation; dispatch: Dispatch<PencilAction>; rechecks: PencilState["rechecks"][string] }) {
   const s = ev.source;
   const out = ev.geo.inArea === false;
   return (
@@ -68,6 +69,19 @@ function SourceCard({ ev, dispatch }: { ev: SourceEvaluation; dispatch: Dispatch
             ))}
           </ul>
         </details>
+      )}
+      {rechecks.length > 0 && (
+        <div className="mt-2 rounded-xl bg-sky-50 p-2 text-sm ring-1 ring-sky-200">
+          <p className="font-semibold text-sky-900">Re-checked from pasted page text (confirmed by you; numbers unchanged)</p>
+          <ul className="mt-1 space-y-1">
+            {rechecks.map((f) => (
+              <li key={f.field}>
+                <span className="font-medium">{PROGRAM_FIELD_LABEL[f.field]}:</span> “{f.quote}”{" "}
+                <span className="text-xs text-muted">({f.mode === "demo-fixture" ? "demo fixture, no AI call" : "AI-extracted"})</span>
+              </li>
+            ))}
+          </ul>
+        </div>
       )}
       {s.conflicts.map((c) => (
         <p key={c} className="mt-2 rounded-xl bg-amber-50 p-2 text-sm text-amber-950 ring-1 ring-amber-200">
@@ -176,7 +190,7 @@ export function SourcesPanel({
       </div>
       <ul className="mt-3 space-y-3">
         {totals.evaluations.map((ev) => (
-          <SourceCard key={ev.source.id} ev={ev} dispatch={dispatch} />
+          <SourceCard key={ev.source.id} ev={ev} dispatch={dispatch} rechecks={state.rechecks[ev.source.id] ?? []} />
         ))}
         {hud && (
           <li className="rounded-2xl bg-white p-4 text-sm ring-1 ring-line">

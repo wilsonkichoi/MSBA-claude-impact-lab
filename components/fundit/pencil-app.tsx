@@ -23,6 +23,7 @@ import { formatPercent, formatSignedUSDWhole, formatUSD, formatUSDCents, formatU
 import { Badge, Button, Card, Icon, cx } from "../ui";
 import { AssumptionChip, Group, NumberField, Segmented, SourceChip } from "./bits";
 import { DonorPanel, LiveRateCheck, MemoPanel, SourcesPanel } from "./panels";
+import { RecheckPanel } from "./recheck";
 
 const usd = formatUSDWhole;
 
@@ -622,6 +623,7 @@ export function PencilApp() {
             </Card>
 
             <SourcesPanel state={state} dispatch={dispatch} totals={totals} inputs={x} />
+            <RecheckPanel state={state} dispatch={dispatch} />
             <DonorPanel inputs={x} dispatch={dispatch} />
             <MemoPanel state={state} />
           </div>
