@@ -1,0 +1,134 @@
+/* South OC Home Atlas (/find). Every rule is scoped to .atlas-root so Pencil and HomeStay are untouched. */
+
+.atlas-root {
+  --atlas-ivory: #f7f2e8;
+  --atlas-card: #fffdf8;
+  --atlas-ink: #2b1d14;
+  --atlas-muted: #6b5a4c;
+  --atlas-brass: #8a6a2f;
+  --atlas-rule: #d9ccb4;
+  background: var(--atlas-ivory);
+  color: var(--atlas-ink);
+}
+
+.atlas-root .atlas-serif {
+  font-family: Georgia, "Times New Roman", serif;
+}
+
+.atlas-root .atlas-num {
+  font-variant-numeric: tabular-nums;
+}
+
+.atlas-root :focus-visible {
+  outline: 3px solid var(--atlas-brass);
+  outline-offset: 2px;
+  border-radius: 4px;
+}
+
+/* Map container */
+.atlas-root .atlas-map {
+  background: var(--atlas-ivory);
+  font-family: inherit;
+}
+.atlas-root .atlas-map.atlas-offline {
+  background:
+    linear-gradient(0deg, rgba(217, 204, 180, 0.35) 1px, transparent 1px) 0 0 / 40px 40px,
+    linear-gradient(90deg, rgba(217, 204, 180, 0.35) 1px, transparent 1px) 0 0 / 40px 40px,
+    var(--atlas-ivory);
+}
+.atlas-root .leaflet-control-attribution {
+  font-size: 11px;
+  background: rgba(255, 253, 248, 0.9);
+}
+.atlas-root .leaflet-container a.leaflet-popup-close-button {
+  color: var(--atlas-ink);
+}
+
+/* Pins: shape + text label, so color is never the only cue */
+.atlas-root .atlas-icon {
+  background: transparent;
+  border: 0;
+}
+.atlas-root .atlas-icon:focus-visible {
+  outline: none;
+}
+.atlas-root .atlas-icon:focus-visible .atlas-shape {
+  outline: 3px solid var(--atlas-brass);
+  outline-offset: 3px;
+}
+.atlas-root .atlas-shape {
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 18px;
+  height: 18px;
+  box-sizing: border-box;
+  border: 2px solid #fffdf8;
+  box-shadow: 0 1px 3px rgba(43, 29, 20, 0.45);
+}
+.atlas-root .atlas-shape--sale {
+  border-radius: 50%;
+  background: #2b1d14;
+}
+.atlas-root .atlas-shape--planned {
+  border-radius: 2px;
+  background: #8a6a2f;
+}
+.atlas-root .atlas-shape--site {
+  width: 0;
+  height: 0;
+  border: 0;
+  box-shadow: none;
+  border-left: 10px solid transparent;
+  border-right: 10px solid transparent;
+  border-bottom: 18px solid #7a2e1f;
+  filter: drop-shadow(0 1px 1px rgba(43, 29, 20, 0.5));
+}
+.atlas-root .atlas-shape--station {
+  width: 12px;
+  height: 12px;
+  left: 3px;
+  top: 3px;
+  background: #4b5d6b;
+  transform: rotate(45deg);
+  border-width: 1.5px;
+}
+.atlas-root .atlas-label {
+  position: absolute;
+  left: 24px;
+  top: -1px;
+  white-space: nowrap;
+  font-size: 12px;
+  font-weight: 600;
+  line-height: 1.2;
+  color: var(--atlas-ink);
+  background: rgba(255, 253, 248, 0.92);
+  border: 1px solid var(--atlas-rule);
+  border-radius: 4px;
+  padding: 1px 5px;
+}
+.atlas-root .atlas-label--station {
+  font-weight: 500;
+  color: #34434f;
+  font-size: 11px;
+}
+.atlas-root .atlas-icon.is-selected .atlas-shape {
+  transform: scale(1.35);
+}
+.atlas-root .atlas-icon.is-selected .atlas-shape--site {
+  transform: scale(1.35);
+}
+.atlas-root .atlas-icon.is-selected .atlas-label {
+  background: var(--atlas-ink);
+  color: #fffdf8;
+  border-color: var(--atlas-ink);
+}
+.atlas-root .atlas-city-label {
+  font-family: Georgia, "Times New Roman", serif;
+  font-size: 13px;
+  font-style: italic;
+  color: var(--atlas-muted);
+  white-space: nowrap;
+  background: transparent;
+  border: 0;
+}
