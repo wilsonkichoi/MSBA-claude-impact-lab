@@ -22,7 +22,7 @@ import { createInitialPencilState, effectiveInputs, pencilReducer } from "@/lib/
 import { formatPercent, formatSignedUSDWhole, formatUSD, formatUSDCents, formatUSDWhole } from "@/lib/format";
 import { Badge, Button, Card, Icon, cx } from "../ui";
 import { AssumptionChip, Group, NumberField, Segmented, SourceChip } from "./bits";
-import { DonorPanel, MemoPanel, SourcesPanel } from "./panels";
+import { DonorPanel, LiveRateCheck, MemoPanel, SourcesPanel } from "./panels";
 
 const usd = formatUSDWhole;
 
@@ -403,6 +403,7 @@ export function PencilApp() {
                     </>
                   )}
                 </p>
+                <LiveRateCheck chosenWeek={x.rateMode === "pmms" ? x.pmmsWeek : null} />
               </div>
               <NumberField
                 label="Buyer cash, per home"

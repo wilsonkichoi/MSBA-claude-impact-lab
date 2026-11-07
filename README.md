@@ -35,6 +35,8 @@ One screen at `/`, for one real property: **504 E Avenida San Juan, San Clemente
 7. **Donor view.** "$25,000 earmarked to construction and site work covers 1.25% of that $2,000,000 line and reduces the free-land gap to $916,157." Money is pooled; this shows scale only.
 8. **Copy funder memo.** Plain text headed "DRAFT · CONDITIONAL SCENARIO · NOT A FINANCING COMMITMENT OR ELIGIBILITY DETERMINATION", with the signal, property facts, both bases, the breakdown, levers, ranking, sources by status, open questions, every ASSUMPTION, and every source URL with its check date. Nothing is sent.
 
+Optional live rate check: **Check latest PMMS** asks our server to read Freddie Mac's CSV once per server start (10-second timeout, cached in memory) and compares it with the snapshot. The calculation always uses the snapshot. On failure it says "Live check unavailable; using snapshot". A chosen week more than 14 days old (ASSUMPTION) gets a stale warning.
+
 HomeStay, our post-purchase companion, is unchanged at `/homestay` (see below).
 
 ## How Claude is used
@@ -127,6 +129,7 @@ All sources checked Nov 7, 2026 unless noted. Links open the official pages; not
 | Insurance lever | +$150/mo per home | The HomeStay sample renewal ($1,800 → $3,600/yr) |
 | Verify-first steps | dev +10%, reserve +$100/mo, budget −$100/mo, rate +0.50, buyer cash −$5,000 | Fixed steps for comparison |
 | Donor gift | $25,000 (when used) | Lane scenario M03 |
+| PMMS stale threshold | 14 days | Weekly series; two missed weeks |
 
 Left out: CalHFA Forgivable Equity Builder (no official URL found), employer-assisted housing (no verified source), LIHTC (rental only).
 
@@ -156,7 +159,7 @@ Left out: CalHFA Forgivable Equity Builder (no official URL found), employer-ass
 
 ## Data and privacy
 
-No personal information. The household is fictional. From the listing we keep only the URL, check date, price, size, status and description, not the agent's contact details. Nothing is stored, sent, filed or submitted. Pencil makes no network requests at runtime; links open official pages in a new tab.
+No personal information. The household is fictional. From the listing we keep only the URL, check date, price, size, status and description, not the agent's contact details. Nothing is stored, sent, filed or submitted. Pencil makes no network requests at runtime unless you click **Check latest PMMS**, which makes one server-side request to freddiemac.com. Links open official pages in a new tab.
 
 ## License
 
@@ -167,7 +170,8 @@ app/page.tsx                       Pencil (Fund it, judged demo)
 components/fundit/                 pencil-app.tsx (screen), panels.tsx (sources, donor, memo), bits.tsx
 lib/fundit/sources.ts              Every source: URL, document date, check date
 lib/fundit/income-limits.ts        HCD State and HOME tables (frozen); income placement
-lib/fundit/rates.ts                PMMS snapshot
+lib/fundit/rates.ts                PMMS snapshot, CSV parser, stale threshold
+app/api/pmms-latest/route.ts       Optional live PMMS check (on click, cached per server start)
 lib/fundit/affordability.ts        50052.5 caps, household budget, price solver
 lib/fundit/project.ts              Gap, levers, verify-first ranking, decision signal
 lib/fundit/catalog.ts              Funding sources, geography check, committed / candidate totals

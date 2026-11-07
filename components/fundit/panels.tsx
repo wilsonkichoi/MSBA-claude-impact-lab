@@ -6,6 +6,7 @@ import { LEAD_STATUS_LABEL, OC_MAP_ELIGIBLE_AREAS, type CatalogTotals, type Lead
 import { buildMemo } from "@/lib/fundit/memo";
 import { computeProject, type GiftLine, type PencilInputs } from "@/lib/fundit/project";
 import { SAN_CLEMENTE } from "@/lib/fundit/property";
+import { daysBetween, LATEST_PMMS, PMMS_STALE_DAYS } from "@/lib/fundit/rates";
 import { SOURCES } from "@/lib/fundit/sources";
 import { candidateInputs, type PencilAction, type PencilState, type SiteCity } from "@/lib/fundit/state";
 import { formatPercent, formatSignedUSDWhole, formatUSDWhole } from "@/lib/format";
@@ -311,5 +312,55 @@ export function MemoPanel({ state }: { state: PencilState }) {
         <pre className="mt-2 max-h-96 overflow-auto rounded-xl bg-canvas p-3 text-xs whitespace-pre-wrap ring-1 ring-line">{text}</pre>
       </details>
     </Card>
+  );
+}
+
+type LiveState =
+  | { kind: "idle" }
+  | { kind: "loading" }
+  | { kind: "fail" }
+  | { kind: "ok"; week: string; rate30: number; today: string };
+
+/** Optional §7 live check. Runs only on click; the snapshot stays in use either way. */
+export function LiveRateCheck({ chosenWeek }: { chosenWeek: string | null }) {
+  const [live, setLive] = useState<LiveState>({ kind: "idle" });
+  const run = async () => {
+    setLive({ kind: "loading" });
+    const now = new Date();
+    const today = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}-${String(now.getDate()).padStart(2, "0")}`;
+    try {
+      const res = await fetch("/api/pmms-latest", { cache: "no-store" });
+      const j = (await res.json()) as { ok: boolean; week?: string; rate30?: number };
+      if (j.ok && j.week && typeof j.rate30 === "number") setLive({ kind: "ok", week: j.week, rate30: j.rate30, today });
+      else setLive({ kind: "fail" });
+    } catch {
+      setLive({ kind: "fail" });
+    }
+  };
+  const age = live.kind === "ok" && chosenWeek ? daysBetween(chosenWeek, live.today) : null;
+  return (
+    <div className="mt-2 rounded-xl bg-canvas p-2 text-xs ring-1 ring-line">
+      <div className="flex flex-wrap items-center gap-2">
+        <span>
+          Snapshot: {LATEST_PMMS.week}, {LATEST_PMMS.rate30.toFixed(2)}% (read {SOURCES.pmms.checkedDate}).
+        </span>
+        <Button size="sm" variant="secondary" onClick={run} disabled={live.kind === "loading"}>
+          {live.kind === "loading" ? "Checking…" : "Check latest PMMS"}
+        </Button>
+      </div>
+      <p className="mt-1 text-muted" aria-live="polite">
+        {live.kind === "idle" && "Optional. Asks our server to read Freddie Mac's CSV once; the calculation keeps using the snapshot."}
+        {live.kind === "fail" && "Live check unavailable; using snapshot."}
+        {live.kind === "ok" &&
+          (live.week === LATEST_PMMS.week && Math.abs(live.rate30 - LATEST_PMMS.rate30) < 1e-9
+            ? `Live: ${live.week}, ${live.rate30.toFixed(2)}%. Matches the snapshot.`
+            : `Live: ${live.week}, ${live.rate30.toFixed(2)}%. Differs from the snapshot (${LATEST_PMMS.week}, ${LATEST_PMMS.rate30.toFixed(2)}%); the calculation still uses the snapshot.`)}
+      </p>
+      {age !== null && age > PMMS_STALE_DAYS && (
+        <p className="mt-1 font-medium text-amber-900">
+          Stale: the chosen week ({chosenWeek}) is {age} days old (warning threshold {PMMS_STALE_DAYS} days, ASSUMPTION).
+        </p>
+      )}
+    </div>
   );
 }
