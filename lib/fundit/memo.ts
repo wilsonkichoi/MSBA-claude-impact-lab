@@ -9,6 +9,7 @@ import { computeProject, decisionSignal, levers, rateFor, sensitivityRanking, SE
 import { SAN_CLEMENTE } from "./property";
 import { RATE_STEP_ASSUMPTION } from "./rates";
 import { SOURCE_LIST, sourceDateLabel } from "./sources";
+import { evaluateStack, singleChanges, stackSentence } from "./path-to-zero";
 import { candidateInputs, effectiveInputs, type PencilState } from "./state";
 
 const usd = formatUSDWhole;
@@ -56,6 +57,22 @@ export function buildMemo(state: PencilState): string {
   L.push(`Max land price supported: ${r.maxLandSupported < 0 ? `none (${usd(r.maxLandSupported)}; even free land leaves a gap)` : usd(r.maxLandSupported)}.`);
   L.push(`Cash needed at land closing: ${usd(r.cashAtLandClose)}.`);
   d.nextChecks.forEach((c, i) => L.push(`Next check ${i + 1}: ${c}`));
+
+  h("What would it take to reach $0 (scenario only; nothing committed)");
+  const st = evaluateStack(x, totals, state.stack);
+  const one = singleChanges({ ...x, landMode: state.stack.land });
+  L.push(stackSentence(st, state.stack, usd));
+  for (const step of st.steps) L.push(`  ${step.label}: ${formatSignedUSDWhole(step.delta)}`);
+  if (state.stack.nonprofitLoan) L.push(`  First-mortgage capital the nonprofit or a partner would fund: ${usd(st.loanCapital)} (market-rate lender: ${usd(st.loanCapitalMarket)}).`);
+  for (const c of st.cautions) L.push(`  Caution: ${c}`);
+  if (!one.alreadyZero) {
+    L.push(`Any one of these alone (with ${state.stack.land} land) reaches $0:`);
+    L.push(`  Mortgage rate ${one.rate.value === null ? "none works" : `≤ ${one.rate.value.toFixed(2)}% (below-market loan; availability Unknown)`}`);
+    L.push(`  Deferred buyer assistance ${one.buyerAssistance.value === null ? "does not work" : `${usd(one.buyerAssistance.value)} per home`}`);
+    L.push(`  Development budget ${one.devCost.value === null ? "none works" : `≤ ${usd(one.devCost.value)}`}`);
+    L.push(`  Grants or gifts ${usd(one.grants.value)}`);
+    L.push(`  Household income ${one.income.value === null ? "none works" : `${usd(one.income.value)}${one.income.changesWhoIsServed ? ` (${one.income.category}; changes who the homes serve)` : ""}`}`);
+  }
 
   h("Property (public listing)");
   L.push(`${SAN_CLEMENTE.address}, ${SAN_CLEMENTE.city} · MLS# ${SAN_CLEMENTE.mls} · ${SAN_CLEMENTE.lotAcres} acres, ${SAN_CLEMENTE.propertyType.toLowerCase()}`);
@@ -115,6 +132,9 @@ export function buildMemo(state: PencilState): string {
 
   h("Assumptions (every one labeled ASSUMPTION)");
   for (const a of assumptionList(x)) L.push(`- ASSUMPTION: ${a}`);
+  if (state.stack.nonprofitLoan) {
+    L.push(`- ASSUMPTION: Below-market first mortgage at ${state.stack.nonprofitRate.toFixed(2)}% held by the nonprofit or a partner (illustrative; not a published Habitat OC term; availability Unknown).`);
+  }
 
   h("Sources (URL · document date · checked)");
   for (const s of SOURCE_LIST) L.push(`- ${s.title}: ${s.url} · ${sourceDateLabel(s)} · checked ${s.checkedDate}${s.searchOnly ? " · seen in search results only" : ""}`);

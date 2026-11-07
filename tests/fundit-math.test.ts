@@ -167,7 +167,10 @@ describe("§5.5 verify-first ranking", () => {
   });
   it("decision signal reads like the brief", () => {
     const d = decisionSignal(capOn, formatUSD);
-    expect(d.headline).toBe("At asking price, 504 E Avenida San Juan does not pencil for 4 homes.");
+    expect(d.headline).toBe("At the $5,900,000 asking price, building 4 homes on 504 E Avenida San Juan (a 2.82-acre lot) does not pencil.");
+    expect(d.perHomeLine).toBe(
+      "Land is $1,475,000 per home and building is $500,000 per home (ASSUMPTION). A family at 72.2% of AMI can pay about $264,710.85 per home.",
+    );
     expect(d.freeLandLine).toContain(formatUSD(941156.61));
     expect(d.verifyFirst).toBe("Verify first: the $2,000,000 development budget. A 10% miss moves the gap by $200,000.");
   });

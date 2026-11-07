@@ -304,6 +304,8 @@ function sentenceFor(r: Omit<SensitivityRow, "sentence">, x: PencilInputs, fmt: 
 export type DecisionSignal = {
   pencilsAtLand: boolean;
   headline: string;
+  /** Why: land and building cost per home vs what a family can pay. */
+  perHomeLine: string;
   freeLandLine: string;
   freeLandGap: number;
   freeLandGapPerHome: number;
@@ -316,15 +318,18 @@ export function decisionSignal(x: PencilInputs, fmt: (n: number) => string): Dec
   const free = computeProject({ ...x, landMode: "donated" });
   const where =
     x.landMode === "asking"
-      ? "At asking price"
+      ? `At the ${fmt(x.askingPrice)} asking price`
       : x.landMode === "custom"
         ? `At a land price of ${fmt(x.customLandPrice)}`
         : "With donated land";
   const homes = `${x.homes} home${x.homes === 1 ? "" : "s"}`;
+  const site = `${SAN_CLEMENTE.address} (a ${SAN_CLEMENTE.lotAcres}-acre lot)`;
   const pencilsAtLand = r.gap <= 0;
   const headline = pencilsAtLand
-    ? `${where}, these inputs say ${SAN_CLEMENTE.address} pencils for ${homes}, with ${fmt(-r.gap)} to spare.`
-    : `${where}, ${SAN_CLEMENTE.address} does not pencil for ${homes}.`;
+    ? `${where}, building ${homes} on ${site} pencils, with ${fmt(-r.gap)} to spare.`
+    : `${where}, building ${homes} on ${site} does not pencil.`;
+  const pct = r.placement ? `${(r.placement.pctOfAmi * 100).toFixed(1)}% of AMI` : "this income";
+  const perHomeLine = `Land is ${fmt(r.landPerHome)} per home and building is ${fmt(x.homes > 0 ? x.devCost / x.homes : x.devCost)} per home (ASSUMPTION). A family at ${pct} can pay about ${fmt(r.price.price)} per home.`;
   const freeLandLine =
     free.gap > 0
       ? `Even with donated land, the project still needs ${fmt(free.gap)} (${fmt(free.gapPerHome)} per home).`
@@ -333,6 +338,7 @@ export function decisionSignal(x: PencilInputs, fmt: (n: number) => string): Dec
   return {
     pencilsAtLand,
     headline,
+    perHomeLine,
     freeLandLine,
     freeLandGap: free.gap,
     freeLandGapPerHome: free.gapPerHome,

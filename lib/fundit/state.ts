@@ -3,6 +3,7 @@
  */
 
 import { catalogTotals, DEFAULT_LEAD_ENTRY, FUNDING_SOURCES, type CatalogTotals, type LeadEntry } from "./catalog";
+import { defaultStack, type StackChoice } from "./path-to-zero";
 import type { ProgramFieldResult } from "./program-extraction";
 import { DEFAULT_INPUTS, type PencilInputs } from "./project";
 import { SAN_CLEMENTE } from "./property";
@@ -16,6 +17,8 @@ export type PencilState = {
   leads: Record<string, LeadEntry>;
   /** Program-page fields a person confirmed (§6). Display only; they never change a number. */
   rechecks: Record<string, (ProgramFieldResult & { mode: "demo-fixture" | "ai" })[]>;
+  /** "What would it take to reach $0?" stack. Scenario only; nothing here is committed. */
+  stack: StackChoice;
 };
 
 type NumericField = {
@@ -27,6 +30,8 @@ export type PencilAction =
   | { type: "SET_INPUTS"; patch: Partial<PencilInputs> }
   | { type: "SET_CITY"; city: SiteCity }
   | { type: "SET_LEAD"; id: string; patch: Partial<LeadEntry> }
+  | { type: "SET_STACK"; patch: Partial<Omit<StackChoice, "programs">> }
+  | { type: "TOGGLE_STACK_PROGRAM"; id: string; on: boolean }
   | { type: "CONFIRM_RECHECK"; id: string; field: ProgramFieldResult & { mode: "demo-fixture" | "ai" } }
   | { type: "RESET" };
 
@@ -36,6 +41,7 @@ export function createInitialPencilState(): PencilState {
     city: SAN_CLEMENTE.city as SiteCity,
     leads: Object.fromEntries(FUNDING_SOURCES.map((s) => [s.id, { ...DEFAULT_LEAD_ENTRY }])),
     rechecks: {},
+    stack: defaultStack(),
   };
 }
 
@@ -52,6 +58,13 @@ export function pencilReducer(state: PencilState, action: PencilAction): PencilS
       const prev = state.leads[action.id] ?? DEFAULT_LEAD_ENTRY;
       return { ...state, leads: { ...state.leads, [action.id]: { ...prev, ...action.patch } } };
     }
+    case "SET_STACK": {
+      const patch = { ...action.patch };
+      if (patch.nonprofitRate !== undefined && !(Number.isFinite(patch.nonprofitRate) && patch.nonprofitRate >= 0)) delete patch.nonprofitRate;
+      return { ...state, stack: { ...state.stack, ...patch } };
+    }
+    case "TOGGLE_STACK_PROGRAM":
+      return { ...state, stack: { ...state.stack, programs: { ...state.stack.programs, [action.id]: action.on } } };
     case "CONFIRM_RECHECK": {
       const prev = (state.rechecks[action.id] ?? []).filter((f) => f.field !== action.field.field);
       return { ...state, rechecks: { ...state.rechecks, [action.id]: [...prev, action.field] } };

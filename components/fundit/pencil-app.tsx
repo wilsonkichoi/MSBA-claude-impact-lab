@@ -15,6 +15,7 @@ import {
   SENSITIVITY_STEPS,
   type LandMode,
 } from "@/lib/fundit/project";
+import { evaluateStack, stackSentence } from "@/lib/fundit/path-to-zero";
 import { SAN_CLEMENTE, syntheticCheck } from "@/lib/fundit/property";
 import { LATEST_PMMS, PMMS_SNAPSHOT, RATE_STEP_ASSUMPTION } from "@/lib/fundit/rates";
 import { SOURCES } from "@/lib/fundit/sources";
@@ -23,6 +24,7 @@ import { formatPercent, formatSignedUSDWhole, formatUSD, formatUSDCents, formatU
 import { Badge, Button, Card, Icon, cx } from "../ui";
 import { AssumptionChip, Group, NumberField, Segmented, SourceChip } from "./bits";
 import { DonorPanel, LiveRateCheck, MemoPanel, SourcesPanel } from "./panels";
+import { PathToZeroPanel } from "./path-to-zero";
 import { RecheckPanel } from "./recheck";
 
 const usd = formatUSDWhole;
@@ -85,6 +87,7 @@ export function PencilApp() {
   const ranking = useMemo(() => sensitivityRanking(x, usd), [x]);
   const weekDelta = useMemo(() => rateWeekDelta({ ...x, landMode: "donated" }, weekA, weekB), [x, weekA, weekB]);
   const synth = useMemo(() => syntheticCheck(), []);
+  const stackLine = useMemo(() => stackSentence(evaluateStack(x, totals, state.stack), state.stack, usd), [x, totals, state.stack]);
   const set = (patch: Partial<typeof x>) => dispatch({ type: "SET_INPUTS", patch });
   const rateStepOn = x.rateMode === "custom" && Math.abs(x.customRate - (LATEST_PMMS.rate30 + RATE_STEP_ASSUMPTION)) < 1e-9;
   const placement = r.placement;
@@ -130,6 +133,7 @@ export function PencilApp() {
               <h1 id="decision-title" className="text-2xl font-bold leading-tight tracking-tight sm:text-3xl">
                 {decision.headline}
               </h1>
+              <p className="mt-2 text-base text-muted">{decision.perHomeLine}</p>
               <p className="mt-3 text-xl leading-snug sm:text-2xl">
                 {decision.freeLandGap > 0 ? (
                   <>
@@ -139,6 +143,12 @@ export function PencilApp() {
                 ) : (
                   decision.freeLandLine
                 )}
+              </p>
+              <p className="mt-3 rounded-xl bg-brand-50 px-3 py-2 text-base font-medium text-brand-900 ring-1 ring-brand-200">
+                {stackLine}{" "}
+                <a href="#p2z-title" className="text-sm font-semibold underline">
+                  See the path
+                </a>
               </p>
               <p className="mt-3 rounded-xl bg-amber-50 px-3 py-2 text-base font-medium text-amber-950 ring-1 ring-amber-200">
                 {decision.verifyFirst}
@@ -172,6 +182,8 @@ export function PencilApp() {
             </div>
           </div>
         </Card>
+
+        <PathToZeroPanel inputs={x} totals={totals} stack={state.stack} city={state.city} dispatch={dispatch} />
 
         <div className="grid items-start gap-6 lg:grid-cols-[minmax(0,1fr)_minmax(0,1.25fr)]">
           {/* Inputs */}

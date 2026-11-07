@@ -26,14 +26,17 @@ Video: _VIDEO LINK TO ADD_
 
 One screen at `/`, for one real property: **504 E Avenida San Juan, San Clemente** (public listing, $5,900,000 asking, 2.82 acres, listing claims a prior 4-parcel approval).
 
-1. **Decision card.** "At asking price, 504 E Avenida San Juan does not pencil for 4 homes. Even with donated land, the project still needs $941,157 ($235,289 per home). Verify first: the $2,000,000 development budget. A 10% miss moves the gap by $200,000." Tiles: gap per home with free land (largest), max land price supported (none: −$941,157), cash needed at land closing.
-2. **What families can pay.** Per home, the lower of a household budget (30% × $100,000 ÷ 12 = $2,500, ASSUMPTION) and the HSC 50052.5 lower-income cap for a 3BR in OC ($2,425.50), with a toggle for "no 50052.5 requirement". The household's placement in the HCD table is shown (72.2% of AMI, lower income).
-3. **Breakdown.** Budget − reserve = P&I → mortgage at the PMMS rate → + buyer cash = price per home → × 4 = proceeds. Land + development − proceeds − committed sources = gap. Every line shows its formula.
-4. **Levers.** Land asking ↔ donated (−$5,900,000), rate +0.50 point (+$48,891), any two PMMS weeks, homeowners insurance +$150/mo per home (+$88,569: the HomeStay renewal), donor gift.
-5. **Verify first.** Each assumption moved by a fixed step, sorted by how much the gap moves.
-6. **Who could close it.** Funding-source cards with recipient, eligible use, geography, amount, timing, status, check date, and a finance-lead status (To verify / Not eligible / Applied / Committed + amount). Only Committed amounts reduce the base gap. **OC MAP is not available in San Clemente**, so it shows red and counts $0 even if someone marks it Committed. "Try the same numbers in Dana Point" shows MAP as a candidate, still not counted, with the $120,000 vs $80,000 / 20% conflict and the 85%-of-median check listed.
-7. **Donor view.** "$25,000 earmarked to construction and site work covers 1.25% of that $2,000,000 line and reduces the free-land gap to $916,157." Money is pooled; this shows scale only.
-8. **Copy funder memo.** Plain text headed "DRAFT · CONDITIONAL SCENARIO · NOT A FINANCING COMMITMENT OR ELIGIBILITY DETERMINATION", with the signal, property facts, both bases, the breakdown, levers, ranking, sources by status, open questions, every ASSUMPTION, and every source URL with its check date. Nothing is sent.
+1. **Decision card.** "At the $5,900,000 asking price, building 4 homes on 504 E Avenida San Juan (a 2.82-acre lot) does not pencil. Land is $1,475,000 per home and building is $500,000 per home (ASSUMPTION). A family at 72.2% of AMI can pay about $264,711 per home. Even with donated land, the project still needs $941,157 ($235,289 per home). Verify first: the $2,000,000 development budget. A 10% miss moves the gap by $200,000." Tiles: gap per home with free land (largest), max land price supported (none: −$941,157), cash needed at land closing. A green line shows the current path to $0 (item 2).
+2. **What would it take to reach $0?** Two parts, both scenario only:
+   - *Any one change alone* that closes the free-land gap: mortgage rate ≤ 1.65%, or $235,289 per home of deferred buyer assistance, or a development budget ≤ $1,058,843, or $941,157 of grants or gifts, or household income of $160,777 (116% of AMI, which changes who the homes serve).
+   - *Build a stack*: land, the programs with stated amounts that apply in the site's city ("if they come through"), and an optional below-market first mortgage held by the nonprofit or a partner (rate is an ASSUMPTION, default 3%; availability Unknown). In San Clemente, donated land + WISH for each buyer + a 3% loan leaves **$191,571 ($47,893 per home)** to raise; without the loan, $809,809. In the Dana Point what-if, adding MAP closes it with $288,429 to spare. It also shows the first-mortgage capital someone has to fund ($1,637,081 at 3% vs $1,018,843 at the market rate) and the open questions (can programs stack on a nonprofit-held loan?).
+3. **What families can pay.** Per home, the lower of a household budget (30% × $100,000 ÷ 12 = $2,500, ASSUMPTION) and the HSC 50052.5 lower-income cap for a 3BR in OC ($2,425.50), with a toggle for "no 50052.5 requirement". The household's placement in the HCD table is shown (72.2% of AMI, lower income).
+4. **Breakdown.** Budget − reserve = P&I → mortgage at the PMMS rate → + buyer cash = price per home → × 4 = proceeds. Land + development − proceeds − committed sources = gap. Every line shows its formula.
+5. **Levers.** Land asking ↔ donated (−$5,900,000), rate +0.50 point (+$48,891), any two PMMS weeks, homeowners insurance +$150/mo per home (+$88,569: the HomeStay renewal), donor gift.
+6. **Verify first.** Each assumption moved by a fixed step, sorted by how much the gap moves.
+7. **Who could close it.** Funding-source cards with recipient, eligible use, geography, amount, timing, status, check date, and a finance-lead status (To verify / Not eligible / Applied / Committed + amount). Only Committed amounts reduce the base gap. **OC MAP is not available in San Clemente**, so it shows red and counts $0 even if someone marks it Committed. "Try the same numbers in Dana Point" shows MAP as a candidate, still not counted, with the $120,000 vs $80,000 / 20% conflict and the 85%-of-median check listed.
+8. **Donor view.** "$25,000 earmarked to construction and site work covers 1.25% of that $2,000,000 line and reduces the free-land gap to $916,157." Money is pooled; this shows scale only.
+9. **Copy funder memo.** Plain text headed "DRAFT · CONDITIONAL SCENARIO · NOT A FINANCING COMMITMENT OR ELIGIBILITY DETERMINATION", with the signal, property facts, both bases, the breakdown, levers, ranking, sources by status, open questions, every ASSUMPTION, and every source URL with its check date. Nothing is sent.
 
 Optional live rate check: **Check latest PMMS** asks our server to read Freddie Mac's CSV once per server start (10-second timeout, cached in memory) and compares it with the snapshot. The calculation always uses the snapshot. On failure it says "Live check unavailable; using snapshot". A chosen week more than 14 days old (ASSUMPTION) gets a stale warning.
 
@@ -56,7 +59,7 @@ npm run dev          # http://localhost:3000 (Pencil);  http://localhost:3000/ho
 ```
 
 ```bash
-npm run check        # typecheck + lint + 117 Vitest tests (83 HomeStay, 34 Pencil)
+npm run check        # typecheck + lint + 126 Vitest tests (83 HomeStay, 43 Pencil)
 npm run build && npm start
 ```
 
@@ -66,7 +69,8 @@ npm run build && npm start
 2. Land lever → Donated: the gap falls from $6,841,157 to $941,157. Untick "Apply the 50052.5 cap": $897,167. The cap limits what families can pay to $2,425.50 instead of $2,500.
 3. "Try 7.68%": +$48,891. Insurance "Try it": +$88,569, "the same renewal HomeStay explains to the family".
 4. Who could close it: OC MAP shows $0 because San Clemente is not an eligible area, so nobody subtracts $480,000. "Try $25,000": the donor view shows 1.25% of the development line.
-5. "Verify first: the $2,000,000 development budget." Copy funder memo. Reset.
+5. "What would it take to reach $0?": donated land + WISH + a 3% nonprofit loan leaves $47,893 per home. Untick the loan ($202,452/home), then switch to Dana Point (it closes). Say plainly that the loan's availability is Unknown.
+6. "Verify first: the $2,000,000 development budget." Copy funder memo. Reset.
 
 ## Reference results (verified by tests)
 
@@ -131,6 +135,7 @@ All sources checked Nov 7, 2026 unless noted. Links open the official pages; not
 | Verify-first steps | dev +10%, reserve +$100/mo, budget −$100/mo, rate +0.50, buyer cash −$5,000 | Fixed steps for comparison |
 | Donor gift | $25,000 (when used) | Lane scenario M03 |
 | PMMS stale threshold | 14 days | Weekly series; two missed weeks |
+| Nonprofit-held first mortgage | 3% (stack default) | Illustrative only; not a published Habitat OC term; availability Unknown |
 
 Left out: CalHFA Forgivable Equity Builder (no official URL found), employer-assisted housing (no verified source), LIHTC (rental only).
 
@@ -150,6 +155,7 @@ Left out: CalHFA Forgivable Equity Builder (no official URL found), employer-ass
 - The OC MAP amount conflict ($120,000 vs $80,000 / 20%) is unresolved.
 - The CalHFA MyHome amount is not confirmed.
 - Cash at land closing uses a "received by land closing" checkbox, not real dates.
+- The stack assumes programs can be combined and can sit behind a nonprofit-held first mortgage. Both are Unknown. Program amounts in the stack are each program's stated maximum, not what a buyer would receive.
 - Confirmed program re-checks are shown next to the static catalog entry; they do not update the geography rule or the amounts, so a changed page still needs a code update to the catalog.
 
 ## Next steps
@@ -179,6 +185,7 @@ lib/fundit/project.ts              Gap, levers, verify-first ranking, decision s
 lib/fundit/catalog.ts              Funding sources, geography check, committed / candidate totals
 lib/fundit/property.ts             San Clemente snapshot, synthetic-deal check
 lib/fundit/memo.ts                 Funder memo text
+lib/fundit/path-to-zero.ts         What would it take to reach $0: single-change solver, stack builder
 lib/fundit/state.ts                Pure reducer and Reset
 lib/fundit/program-extraction.ts   Program re-check: prompt, schema, quote validation, OC MAP demo fixture
 app/api/recheck-program/route.ts   Program re-check endpoint (consent required for AI; fixture offline)
