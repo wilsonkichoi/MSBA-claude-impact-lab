@@ -30,6 +30,19 @@ export function formatUSD(n: number): string {
   return fmt.format(Object.is(r, -0) ? 0 : r);
 }
 
+/** Nearest whole dollar: $941,157. Used by Pencil for large project figures. */
+export function formatUSDWhole(n: number): string {
+  const r = Math.round(n);
+  return wholeDollars.format(Object.is(r, -0) ? 0 : r);
+}
+
+/** +$88,569 / -$5,900,000 / $0, whole dollars. */
+export function formatSignedUSDWhole(n: number): string {
+  const r = Math.round(n);
+  if (r === 0) return formatUSDWhole(0);
+  return `${r > 0 ? "+" : "-"}${formatUSDWhole(Math.abs(r))}`;
+}
+
 /** Always shows cents: $150.00. */
 export function formatUSDCents(n: number): string {
   return cents.format(roundToCents(n));
