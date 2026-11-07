@@ -126,7 +126,7 @@ export function AtlasApp() {
         <main className="order-1 flex min-w-0 flex-1 flex-col min-[860px]:order-none min-[860px]:min-h-0">
           <Toolbar state={state} dispatch={dispatch} onOpen={setOverlay} />
           <div className="relative flex flex-1 flex-col min-[860px]:min-h-0 min-[860px]:flex-row">
-            <div className="relative h-[58vh] min-w-0 flex-1 min-[860px]:h-auto">
+            <div className="relative h-[58vh] min-w-0 shrink-0 min-[860px]:h-auto min-[860px]:flex-1 min-[860px]:shrink">
               <AtlasMap pins={pins} selectedId={selected?.id ?? null} onSelect={onSelect} />
               <Legend />
               {filtered.results.length === 0 && filtered.reason && (

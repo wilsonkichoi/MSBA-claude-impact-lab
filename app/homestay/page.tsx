@@ -1,5 +1,11 @@
 import { HomeStayApp } from "@/components/homestay-app";
+import { SectionNav } from "@/components/section-nav";
 
 export default function Page() {
-  return <HomeStayApp />;
+  return (
+    <>
+      <SectionNav current="stay" />
+      <HomeStayApp />
+    </>
+  );
 }

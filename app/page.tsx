@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { PencilApp } from "@/components/fundit/pencil-app";
+import { SectionNav } from "@/components/section-nav";
 
 export const metadata: Metadata = {
   title: "Pencil — What would it take? (Fund it demo)",
@@ -9,5 +10,10 @@ export const metadata: Metadata = {
 };
 
 export default function Page() {
-  return <PencilApp />;
+  return (
+    <>
+      <SectionNav current="fund" />
+      <PencilApp />
+    </>
+  );
 }
